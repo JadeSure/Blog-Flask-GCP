@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CCAssign1</title>
+</head>
+<body>
+    <h1>Welcome CC Ass1!</h1>
+    <form action="/login" method="post">
+        <table>
+            <tr>
+                <td>ID: </td>
+                <td><input type = "text" name = "ID"></td>
+            </tr>
+
+            <tr>
+                <td>Password: </td>
+                <td><input type="password" name = "password"></td>
+            </tr>
+            <tr>
+                <td><input type="Submit" value = "Login"></td>
+                <td><a href="/register">Register</a></td>
+            </tr>
+        </table>
+    </form>
+
+    <a href="/bigquery">BigQuery Link</a>
+
+    {% if error %}
+        <p><strong>Error</strong>: {{ error }}</p>
+    {% endif %}
+</body>
+</html>

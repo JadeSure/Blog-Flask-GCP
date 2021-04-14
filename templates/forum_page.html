@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Forum Page</title>
+</head>
+<body>
+{#    {% with messages = get_flashed_messages() %}#}
+{#        {% if messages %}#}
+{#            {% for message in messages %}#}
+{#                <p>{{ message }}</p>#}
+{#            {% endfor %}#}
+{#    {% endwith %}#}
+    <h1>This is a forum page!</h1>
+    <p>Welcome user: <a href="user_page"><b>{{ name }}</b></a></p>
+    <p align="left"><a href="logout">logout</a></p>
+    <img src={{ url }} alt="Ooh!" width="100", height="100">
+
+<form action="/forum_page" method="post" enctype="multipart/form-data">
+            <table>
+                {{ form.csrf_token() }}
+                <tr>
+                    <td>
+                        {{ form.id.label }}
+                    </td>
+                    <td>
+                        {{ form.id }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        {{form.username.label}}
+                    </td>
+                    <td>
+                        {{form.username  }}
+                    </td>
+                </tr>
+            <tr>
+                <td>
+                    {{ form.password1.label }}
+                </td>
+
+                <td>
+                     {{ form.password1 }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form.password2.label }}
+                </td>
+                <td>
+                    {{ form.password2 }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form.photo.label }}
+                </td>
+                <td>
+                      {{ form.photo }}
+                </td>
+{#                <td>#}
+{#                    <input type = "file" name = "file" />#}
+{#                </td>#}
+            </tr>
+            <tr>
+                <td>
+                    {{ form.submit }}
+                </td>
+            </tr>
+            </table>
+        </form>
+</body>
+</html>
