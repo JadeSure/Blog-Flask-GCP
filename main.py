@@ -1,4 +1,4 @@
-
+import datetime
 import random
 
 from flask import Flask, render_template, request, session, url_for, redirect
@@ -156,7 +156,8 @@ def root():
             store_user(user_dict[i][0], user_dict[i][1], user_dict[i][2], user_dict[i][3])
 
     if 'username' in session:
-        return render_template('forum_page.html', name=session['username'], url=session['url'])
+        forum_form = ForumForm()
+        return render_template('forum_page.html', form = forum_form, name=session['username'], url=session['url'])
     #
     # get_property_query()
     # times = fetch_times(10)
@@ -193,7 +194,9 @@ def __judge_status(id, pd):
 @app.route('/login', methods=['POST'])
 def login():
     if 'username' in session:
-        return render_template('forum_page.html', name = session['username'])
+
+        output = display_forum(10)
+        return render_template('forum_page.html', name = session['username'], output = output)
 
     curr_id = request.form['ID']
     curr_pd = request.form['password']
@@ -201,10 +204,11 @@ def login():
     #TODO:
 
     if __judge_status(curr_id, curr_pd):
-
+        form = ForumForm()
         # print(session['url'])
         # flash("Login Successfully!")
-        return render_template('forum_page.html', name = session['username'], url = session['url'])
+        output = display_forum(10)
+        return render_template('forum_page.html', name = session['username'],form= form, url = session['url'], output = output)
     else:
         error = "ID or password is invalid"
         return render_template('index.html', error = error)
@@ -291,13 +295,93 @@ def register():
 @app.route('/forum_page', methods=['POST', 'GET'])
 def forum():
     forum_form = ForumForm()
+    limit = 10
+
     if request.method == 'POST':
-        # print(request.form)
+        subject = ''
+        message_text = ''
         if forum_form.validate_on_submit():
-            pass
+            subject = request.form.get('subject')
+            message_text = request.form.get('message_text')
+            filename = images.save(forum_form.photo.data)
+            forum_save(filename, subject, message_text)
+
+            # return render_template('forum_page.html', form = forum_form, message = message_text, subject = subject,
+            #                        name=session['username'], url=session['url'])
+            output = display_forum(limit)
+            return render_template('forum_page.html', form=forum_form,
+                                   name=session['username'], url=session['url'], output = output)
+
+def forum_save(filename,subject, message):
+    temp_url = Bucket(bucket_name, PATH_BASE+str(filename)).image_url
+    kind1 = 'user'
+
+    parent_key = datastore_client.key(kind1, session['id'])
+    task_key = datastore_client.key('message', parent = parent_key)
+
+    task = datastore.Entity(task_key)
+    dt = datetime.datetime.now()
+
+    task.update({
+        'subject': subject,
+        'message': message,
+        'url': temp_url,
+        'timestamp': dt
+    })
+
+    datastore_client.put(task)
+
+def display_forum(limit):
+    kind = 'message'
+    # parent_key = datastore_client.key('user', session['id'])
+    # my_query = datastore_client.query(ancestor=parent_key)
+
+    query = datastore_client.query(kind = kind)
+    query.order = ['-timestamp']
+    output = query.fetch(limit = limit)
+    return output
 
 
-    return render_template('forum_page.html', forum = forum_form)
+    # subject_set = set()
+    # for entity in list(my_query.fetch()):
+    #     if 'subject' in entity:
+    #
+    #         subject_set.add(entity['subject'])
+    #
+    # for i in subject_set:
+    #     final_query = datastore_client.query(kind = i, ancestor = parent_key)
+    #     output.extend(final_query.fetch)
+    # #
+    # #     for entity in list(final_query.fetch()):
+    # #         output.extend(entity)
+    #
+    # for i in subject_set:
+    #     my_query.add_filter('subject', '=', i)
+    #
+    #
+    # for k in my_query.fetch():
+    #     print(k)
+    #
+    # my_query.order = ['-timestamp']
+    # output = my_query.fetch(limit = limit)
+    # for i in output:
+    #     print(i['message'])
+    # return output
+
+
+
+
+
+
+# parent_key = datastore_client.key('user', 's38039909')
+# my_query = datastore_client.query(ancestor = parent_key)
+#
+# for entity in list(my_query.fetch()):
+#     if 'subject' in entity:
+#         print(entity['subject'])
+#
+#         print(entity['message'])
+
 
 @app.route('/logout')
 def logout():

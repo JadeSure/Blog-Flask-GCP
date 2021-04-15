@@ -15,44 +15,54 @@
     <p>Welcome user: <a href="user_page"><b>{{ name }}</b></a></p>
     <p align="left"><a href="logout">logout</a></p>
     <img src={{ url }} alt="Ooh!" width="100", height="100">
+<HR>
+    <dt>Lastest comments: </dt>
 
+        {% for i in output %}
+            <p>Posted by: {{ name }}
+            <img src={{ i['url'] }} alt="Ooh!" width="100", height="100">
+               Posted time: {{ i['timestamp'] }}</p>
+            <p>Subject: {{ i['subject'] }}
+               Message: {{ i['message'] }}</p>
+        {% endfor %}
+{#<table>#}
+{#    <tr>#}
+{#        {% if subject %}#}
+{##}
+{#    </tr>#}
+{#    <tr>#}
+{#        <td>{{ subject }}</td>#}
+{#    </tr>#}
+{#    <tr>#}
+{#        <td>{{ message }}</td>#}
+{#    </tr>#}
+{#    <br>#}
+{#    <br>#}
+{#    <br>#}
+{#    <br>#}
+{#</table>#}
+
+<HR>
 <form action="/forum_page" method="post" enctype="multipart/form-data">
             <table>
                 {{ form.csrf_token() }}
                 <tr>
                     <td>
-                        {{ form.id.label }}
+                        {{ form.subject.label }}
                     </td>
                     <td>
-                        {{ form.id }}
+                        {{ form.subject }}
                     </td>
                 </tr>
 
                 <tr>
                     <td>
-                        {{form.username.label}}
+                        {{form.message_text.label}}
                     </td>
                     <td>
-                        {{form.username  }}
+                        {{form.message_text  }}
                     </td>
                 </tr>
-            <tr>
-                <td>
-                    {{ form.password1.label }}
-                </td>
-
-                <td>
-                     {{ form.password1 }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    {{ form.password2.label }}
-                </td>
-                <td>
-                    {{ form.password2 }}
-                </td>
-            </tr>
             <tr>
                 <td>
                     {{ form.photo.label }}
@@ -71,5 +81,22 @@
             </tr>
             </table>
         </form>
+
+<HR>
+
+{% if form.subject.errors or form.message_text.errors or form.photo.errors %}
+Error message:
+    {% for message in form.subject.errors %}
+        <p>{{ message }}</p>
+    {% endfor %}
+
+    {% for message in form.message_text.errors %}
+        <p>{{ message }}</p>
+    {% endfor %}
+
+    {% for message in form.photo.errors %}
+        <p>{{ message }}</p>
+    {% endfor %}
+{% endif %}
 </body>
 </html>
