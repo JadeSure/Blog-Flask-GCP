@@ -19,9 +19,9 @@
     <dt>Lastest comments: </dt>
 
         {% for i in output %}
-            <p>Posted by: {{ name }}
-            <img src={{ i['url'] }} alt="Ooh!" width="100", height="100">
-               Posted time: {{ i['timestamp'] }}</p>
+            <p>Posted by: {{ i['name'] }}
+                <img src={{ i['url'] }} alt="Ooh!" width="100", height="100"> </p>
+               <p>Posted time: {{ i['timestamp'] }}</p>
             <p>Subject: {{ i['subject'] }}
                Message: {{ i['message'] }}</p>
         {% endfor %}

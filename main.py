@@ -157,7 +157,8 @@ def root():
 
     if 'username' in session:
         forum_form = ForumForm()
-        return render_template('forum_page.html', form = forum_form, name=session['username'], url=session['url'])
+        output = display_forum(10)
+        return render_template('forum_page.html', form = forum_form, name=session['username'], url=session['url'], output = output)
     #
     # get_property_query()
     # times = fetch_times(10)
@@ -196,6 +197,7 @@ def login():
     if 'username' in session:
 
         output = display_forum(10)
+
         return render_template('forum_page.html', name = session['username'], output = output)
 
     curr_id = request.form['ID']
@@ -213,8 +215,6 @@ def login():
         error = "ID or password is invalid"
         return render_template('index.html', error = error)
 
-def delete_userinfo():
-    pass
 
 @app.route('/change_password', methods=['POST'])
 def change_password():
@@ -304,15 +304,17 @@ def forum():
             subject = request.form.get('subject')
             message_text = request.form.get('message_text')
             filename = images.save(forum_form.photo.data)
-            forum_save(filename, subject, message_text)
+            name = session['username']
+            forum_save(filename, subject, message_text, name)
 
             # return render_template('forum_page.html', form = forum_form, message = message_text, subject = subject,
             #                        name=session['username'], url=session['url'])
-            output = display_forum(limit)
-            return render_template('forum_page.html', form=forum_form,
-                                   name=session['username'], url=session['url'], output = output)
+    output = display_forum(limit)
+    return render_template('forum_page.html', form=forum_form,
+                           name=session['username'], url=session['url'], output = output)
 
-def forum_save(filename,subject, message):
+
+def forum_save(filename,subject, message, name):
     temp_url = Bucket(bucket_name, PATH_BASE+str(filename)).image_url
     kind1 = 'user'
 
@@ -323,6 +325,7 @@ def forum_save(filename,subject, message):
     dt = datetime.datetime.now()
 
     task.update({
+        'name': name,
         'subject': subject,
         'message': message,
         'url': temp_url,
@@ -330,6 +333,31 @@ def forum_save(filename,subject, message):
     })
 
     datastore_client.put(task)
+
+
+
+
+def forum_update(id,filename,subject, message, name, timestamp):
+    temp_url = Bucket(bucket_name, PATH_BASE + str(filename)).image_url
+
+    complete_key = datastore_client.key("message", int(id))
+
+    task = datastore.Entity(key=complete_key)
+
+    task.update(
+        {
+            "message": message,
+            "name": name,
+            "subject": subject,
+            "timestamp": timestamp,
+            'url': temp_url
+        }
+    )
+
+    datastore_client.put(task)
+
+    delete_key = datastore_client.key("message", int(id))
+    datastore_client.delete(delete_key)
 
 def display_forum(limit):
     kind = 'message'
@@ -339,6 +367,15 @@ def display_forum(limit):
     query = datastore_client.query(kind = kind)
     query.order = ['-timestamp']
     output = query.fetch(limit = limit)
+    return output
+
+def display_user_post():
+    kind = 'user'
+
+    parent_key = datastore_client.key(kind, session['id'])
+
+    my_query  = datastore_client.query(kind = 'message', ancestor = parent_key)
+    output = my_query.fetch()
     return output
 
 
@@ -381,6 +418,38 @@ def display_forum(limit):
 #         print(entity['subject'])
 #
 #         print(entity['message'])
+@app.route('/edit_message', methods=['POST','GET'])
+def edit_message():
+    ID = request.form['prodId']
+    print(ID)
+
+    # query = datastore_client.query(kind = 'message')
+    # # query.add_filter('ID', '=', str(ID))
+    # # # query.add_filter('ID', '=', 'python')
+    # output = query.fetch()
+    # for i in output:
+    #     print(i)
+
+
+    # key = datastore_client.key('message', str(ID))
+    # task = datastore_client.get(key)
+    #
+    # for i in task:
+    #     print(i['name'])
+    forum_form = ForumForm()
+    limit = 10
+
+    if request.method == 'POST':
+        if forum_form.validate_on_submit():
+            subject = request.form.get('subject')
+            message_text = request.form.get('message_text')
+            filename = images.save(forum_form.photo.data)
+            name = session['username']
+            timestamp =  datetime.datetime.now()
+            forum_update(ID, filename, subject, message_text, name, timestamp)
+
+    # return redirect(url_for('forum'))
+    return render_template('message_edit.html', form=forum_form)
 
 
 @app.route('/logout')
@@ -393,8 +462,9 @@ def logout():
 
 @app.route('/user_page')
 def user_page():
+    output = display_user_post()
 
-    return render_template('user_page.html', name= session['username'])
+    return render_template('user_page.html', name= session['username'], output = output)
 
 if __name__ == '__main__':
 

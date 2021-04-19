@@ -24,8 +24,27 @@
 
             </tr>
         </table>
+        </form>
 
-    </form>
+
+        <dt>Your Post message: </dt>
+
+        {% for i in output %}
+            <form action="/edit_message", method="POST">
+
+            <p>Posted by: {{ name }}
+                <img src={{ i['url'] }} alt="Ooh!" width="100", height="100"></p>
+             <p>Posted time: {{ i['timestamp'] }}</p>
+            <p>Subject: {{ i['subject'] }} </p>
+            <p>Message: {{ i['message'] }} </p>
+                <p> ID:  {{i['id'] }}</p>
+
+             <input id="prodId" name="prodId" type="hidden" value={{ i['id'] }}>
+            <td><input type="Submit" value = "Edit"></td>
+            </form>
+        {% endfor %}
+
+
 
     {% if error %}
         <p><strong>Error</strong>: {{ error }}</p>

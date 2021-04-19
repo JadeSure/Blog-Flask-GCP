@@ -2,9 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Message Edit</title>
 </head>
 <body>
 
+<form action="/forum_page" method="post" enctype="multipart/form-data">
+            <table>
+                {{ form.csrf_token() }}
+                <tr>
+                    <td>
+                        {{ form.subject.label }}
+                    </td>
+                    <td>
+                        {{ form.subject }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        {{form.message_text.label}}
+                    </td>
+                    <td>
+                        {{form.message_text  }}
+                    </td>
+                </tr>
+            <tr>
+                <td>
+                    {{ form.photo.label }}
+                </td>
+                <td>
+                      {{ form.photo }}
+                </td>
+{#                <td>#}
+{#                    <input type = "file" name = "file" />#}
+{#                </td>#}
+            </tr>
+            <tr>
+                <td>
+                    {{ form.submit }}
+                </td>
+            </tr>
+            </table>
+        </form>
 </body>
 </html>
